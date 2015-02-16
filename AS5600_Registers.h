@@ -16,8 +16,10 @@
 
 #define CONF_H        0x07
 
-  #define WD_BIT      5   //  Watch dog
-                          //  0 = OFF, 1 = ON
+  #define SF_BIT      0   //  Slow Filter
+                          //  00 = 16x*; 01 = 8x; 10 = 4x; 11 = 2x
+  #define SF_MASK     0b11 << SF_BIT
+
 
   #define FFTH_BIT    2   //  Fast Filter Threshold
                           /*  000 = slow filter only,
@@ -28,9 +30,14 @@
                               101 = 21 LSBs,
                               110 = 24 LSBs,
                               111 = 10 LSBs */
+  #define FFTH_MASK   0b111 << FFTH_BIT
 
-  #define SF_BIT      0   //  Slow Filter
-                          //  00 = 16x*; 01 = 8x; 10 = 4x; 11 = 2x
+  #define WD_BIT      5   //  Watch dog
+                          //  0 = OFF,
+                          //  1 = ON
+
+
+
 
 #define CONF_L        0x08
 
@@ -40,25 +47,33 @@
                               10 = LPM2,
                               11 = LPM3 */
 
+  #define PWR_MASK    0b11 << PWR_BIT
+
+
   #define HYST_BIT    2  /*   Hysteresis
                               00 = OFF,
                               01 = 1 LSB,
                               10 = 2 LSBs,
                               11 = 3 LSBs
                                         */
+  #define HYST_MASK   0b11 << HYST_BIT
+
 
   #define OUT_BIT     4  /*   Output Stage
                               00 = full analog (GND == 0% to VDD == 100%),
                               01 = reduced analog (GND == 0% to VDD == 90%),
                               10 = digital PWM (DAC Off)
                                         */
+  #define OUT_MASK    (0b11 << OUT_BIT)
+
+
   #define PWM_BIT     6  /*   PWM Frequency
                               00 = 115 Hz;
                               01 = 230 Hz;
                               10 = 460 Hz;
                               11 = 920 Hz
-
                                         */
+  #define PWM_MASK    0b11 << PWM_BIT
 
 
 

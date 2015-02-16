@@ -10,8 +10,14 @@ void setup(){
   }
   Serial.print(F("Starting..."));
   test.begin();
+  Serial.println(test.setZeroPosition());
+
 
   Serial.println(F("Done"));
+  test.setOutPinMode(digital_PWM);
+
+
+
 }
 
 
@@ -30,12 +36,12 @@ void loop(){
         break;
 
       case MD:
-        Serial.println(F("Magnet Detected"));
-        Serial.print(F("Raw Angle: "));
-        Serial.println(test.getRawAngle());
+      //  Serial.println(F("Magnet Detected"));
+        //Serial.print(F("Raw Angle: "));
+        //Serial.println(test.getRawAngle());
         Serial.print(F("Filtered Angle: "));
         Serial.println(test.getAngle());
-        Serial.println();
+        //Serial.println();
         break;
 
       case READ_ERROR:
@@ -45,5 +51,5 @@ void loop(){
 
   //Serial.print(F(" , "));
   //Serial.println(test.getAngle(), BIN);
-  delay(500);
+  delay(50);
 }

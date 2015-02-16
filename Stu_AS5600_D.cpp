@@ -11,32 +11,37 @@ void Stu_AS5600::begin( void ){
   delay(100);
   I2c.timeOut(50);
 
-  getRawAngle();
-
-
-
-
   delay(1); //Wait at least 1 ms.
 
 }
 
 AGC_e Stu_AS5600::getAGC( void ){
 
-  uint8_t agc = _readI2C( STATUS );
-  Serial.println(agc, BIN);
-  switch(agc){
-    case ( 1 << MH_BIT ):
+  union{
+    struct{
+      uint8_t MH:1;
+      uint8_t ML:1;
+      uint8_t MD:1;
+
+    };
+    uint8_t byte;
+
+  }agc;
+
+  agc.byte = _readI2C( STATUS ) >> 3;
+
+
+  if(agc.MH){
       return MH;
-      break;
+    }
 
-    case ( 1 << ML_BIT ):
+  else if(agc.ML){
       return ML;
-      break;
+    }
 
-    case ( 1 << MD_BIT ):
+  else if(agc.MD){
       return MD;
-      break;
-  }
+    }
 
   return READ_ERROR;
 
@@ -76,20 +81,68 @@ uint16_t Stu_AS5600::_readAngle( angle_e e ){
 
   }
   _readI2C(address, 2, pos.b);
-/*
-  Serial.println(pos.b[0], BIN);
-  Serial.println(pos.b[1], BIN);
-  Serial.println(pos.i);
-  Serial.println();
-*/
+  
   return (pos.i);
 }
 
-void Stu_AS5600::setZeroPosition( void ){
+void Stu_AS5600::setOutPinMode( out_mode_e mode ){
+  uint8_t modeByte;
+  switch(mode){
+    case analog_full:
+      modeByte = 0b00 ;
+      break;
+
+    case analog_reduced:
+      modeByte = 0b01 ;
+      break;
+
+    case digital_PWM:
+      modeByte = 0b10 ;
+      break;
+  }
+  modeByte <<= OUT_BIT;
+
+  uint8_t reg = _readI2C(CONF_L);
+  delay(2);
+
+  reg &= ~OUT_MASK;
+  reg |= modeByte;
+
+  _overWriteI2C( CONF_L, (modeByte) );
+  delay(2);
+
+
+}
+
+
+
+bool Stu_AS5600::setZeroPosition( void ){
   mag_data_t pos;
-  pos.i = getRawAngle();
 
+  int maxTries = 10;
+/*
+  Serial.println();
+  Serial.println(pos.hb, BIN);
+  Serial.println(pos.lb, BIN);
+  Serial.println(pos.b[0], BIN);
+  Serial.println(pos.b[1] << 8, BIN);
+  Serial.println(pos.i, BIN);
+  Serial.println(pos.i);
+  //Serial.println();
+*/
+int i = 0;
+while(getAGC() != MD && i < maxTries){
+  delay(200);
+  i++;
+}
+if(i >= maxTries){
+  return 0;
+}
 
+pos.i = getRawAngle();
+  _overWriteI2C(ZPOS_H, pos.hb);
+  _overWriteI2C(ZPOS_L, pos.lb);
+  return 1;
 
 }
 
@@ -112,16 +165,15 @@ void Stu_AS5600::_readI2C( uint8_t regAddress, int16_t numBytes, uint8_t* destAr
 
 void Stu_AS5600::_writeI2C( uint8_t regAddress, uint8_t value ){
 
-  uint8_t tempReg = _readI2C(regAddress);
-  tempReg |= value;
-  _overWriteI2C(regAddress, tempReg);
+  //uint8_t tempReg = _readI2C(regAddress);
+  //tempReg &= (value) & 0xFF;
+  _overWriteI2C(regAddress, value);
 
 }
 
 void Stu_AS5600::_overWriteI2C( uint8_t regAddress, uint8_t value ){
-  uint8_t nackack = 100;
-  while(nackack != 0){
-    nackack = I2c.write(_I2CAddress, regAddress, value ); // Write to AS5600 Address with Value
-    delay(2); // Wait 2 ms to prevent overpolling
-  }
+
+  I2c.write(_I2CAddress, regAddress, value ); // Write to AS5600 Address with Value
+
+
 }

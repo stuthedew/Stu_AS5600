@@ -13,6 +13,13 @@ typedef enum{
 
 }AGC_e;
 
+typedef enum{
+  analog_full = 0 ,
+  analog_reduced ,
+  digital_PWM
+
+}out_mode_e;
+
 class Stu_AS5600 {
 
 public:
@@ -20,9 +27,13 @@ public:
 
   void
     begin( void ),
+    setOutPinMode( out_mode_e mode );
+
+  bool
     setZeroPosition( void ),
     setStopPosition( void ),
     setMaxAngle( void );
+
 
 
   uint16_t
@@ -36,8 +47,20 @@ private:
 
   typedef union {
 
-        uint8_t b[2];
-        int16_t i;
+      struct{
+
+        uint16_t lb:8;
+        uint16_t hb:4;
+
+
+      };
+      uint16_t i:12;
+
+      uint8_t b[2];
+
+
+
+
 
   } mag_data_t;
 
