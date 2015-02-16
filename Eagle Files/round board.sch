@@ -1541,6 +1541,10 @@ These are standard reverse protection diodes and small signal diodes. SMA packag
 </nets>
 </sheet>
 </sheets>
+<errors>
+<approved hash="104,1,38.1,45.72,U$1,VDD3V3,N$1,,,"/>
+<approved hash="113,1,112.437,42.9853,JP1,,,,,"/>
+</errors>
 </schematic>
 </drawing>
 </eagle>
